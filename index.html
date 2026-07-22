@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تست‌کننده آنلاین Gemini API</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: 'Tahoma', 'Segoe UI', sans-serif;
+        }
+        body {
+            background-color: #0f172a;
+            color: #f8fafc;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            background-color: #1e293b;
+            border-radius: 16px;
+            padding: 30px;
+            width: 100%;
+            max-width: 520px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+            border: 1px solid #334155;
+        }
+        h1 {
+            font-size: 1.4rem;
+            margin-bottom: 20px;
+            text-align: center;
+            color: #38bdf8;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+            color: #94a3b8;
+        }
+        input, textarea {
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #334155;
+            background-color: #0f172a;
+            color: #fff;
+            font-size: 0.95rem;
+            transition: border-color 0.2s;
+        }
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: #38bdf8;
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: #0284c7;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.2s;
+        }
+        button:hover {
+            background-color: #0369a1;
+        }
+        button:disabled {
+            background-color: #475569;
+            cursor: not-allowed;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            display: none;
+            line-height: 1.6;
+        }
+        .success {
+            background-color: rgba(34, 197, 94, 0.1);
+            border: 1px solid #22c55e;
+            color: #4ade80;
+        }
+        .error {
+            background-color: rgba(239, 68, 68, 0.1);
+            border: 1px solid #ef4444;
+            color: #f87171;
+        }
+        .response-box {
+            margin-top: 10px;
+            padding: 12px;
+            background: #0f172a;
+            border-radius: 6px;
+            color: #e2e8f0;
+            white-space: pre-wrap;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>🔑 تست‌کننده آنلاین کلید Gemini</h1>
+    
+    <div class="form-group">
+        <label for="apiKey">کلید API جمینای:</label>
+        <input type="text" id="apiKey" placeholder="مثلاً: AQ.Ab8RN... یا AIzaSy...">
+    </div>
+
+    <div class="form-group">
+        <label for="message">متن پیام جهت ارسال:</label>
+        <textarea id="message" rows="3">سلام! اگر سالمی یک جمله کوتاه بگو.</textarea>
+    </div>
+
+    <button id="sendBtn" onclick="checkGeminiKey()">ارسال پیام و بررسی کلید 🚀</button>
+
+    <div id="resultBox" class="result">
+        <strong id="statusTitle"></strong>
+        <div id="responseContainer" style="display:none;">
+            <p style="margin-top:8px; font-size:0.85rem; color:#94a3b8;">پاسخ جمینای:</p>
+            <div id="replyText" class="response-box"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+async function checkGeminiKey() {
+    const apiKey = document.getElementById('apiKey').value.trim();
+    const message = document.getElementById('message').value.trim();
+    const sendBtn = document.getElementById('sendBtn');
+    const resultBox = document.getElementById('resultBox');
+    const statusTitle = document.getElementById('statusTitle');
+    const responseContainer = document.getElementById('responseContainer');
+    const replyText = document.getElementById('replyText');
+
+    if (!apiKey) {
+        alert('لطفاً ابتدا کلید API را وارد کنید!');
+        return;
+    }
+
+    // تغییر حالت دکمه به در حال بارگذاری
+    sendBtn.disabled = true;
+    sendBtn.innerText = 'در حال ارسال و بررسی... ⏳';
+    resultBox.style.display = 'none';
+
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+
+    try {
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                contents: [{
+                    parts: [{ text: message || "سلام" }]
+                }]
+            })
+        });
+
+        const data = await response.json();
+        resultBox.style.display = 'block';
+
+        if (response.ok && data.candidates && data.candidates[0].content) {
+            resultBox.className = 'result success';
+            statusTitle.innerText = '✅ کلید سالمه و پاسخ دریافت شد!';
+            replyText.innerText = data.candidates[0].content.parts[0].text;
+            responseContainer.style.display = 'block';
+        } else {
+            resultBox.className = 'result error';
+            const errorMsg = data.error?.message || 'پاسخی از سرور دریافت نشد.';
+            statusTitle.innerText = '❌ کلید خراب است یا خطایی رخ داد!';
+            replyText.innerText = `علت خطا: ${errorMsg}`;
+            responseContainer.style.display = 'block';
+        }
+    } catch (err) {
+        resultBox.style.display = 'block';
+        resultBox.className = 'result error';
+        statusTitle.innerText = '❌ خطای شبکه / عدم ارتباط';
+        replyText.innerText = 'امکان برقراری ارتباط با گوگل وجود ندارد. (از اتصال اینترنت یا تحریم‌شکن/فیلترشکن مطمئن شوید)';
+        responseContainer.style.display = 'block';
+    } finally {
+        sendBtn.disabled = false;
+        sendBtn.innerText = 'ارسال پیام و بررسی کلید 🚀';
+    }
+}
+</script>
+
+</body>
+</html>
