@@ -117,8 +117,8 @@
     <div class="form-group">
         <label for="modelSelect">انتخاب مدل جمینای:</label>
         <select id="modelSelect">
-            <option value="gemini-1.5-flash-latest">Gemini 1.5 Flash (پیش‌فرض و مطمئن)</option>
-            <option value="gemini-1.5-pro-latest">Gemini 1.5 Pro</option>
+            <option value="gemini-1.5-flash">Gemini 1.5 Flash (پایدار و استاندارد)</option>
+            <option value="gemini-1.5-pro">Gemini 1.5 Pro</option>
             <option value="gemini-2.0-flash">Gemini 2.0 Flash</option>
         </select>
     </div>
@@ -159,8 +159,8 @@ async function checkGeminiKey() {
     sendBtn.innerText = 'در حال ارسال و بررسی... ⏳';
     resultBox.style.display = 'none';
 
-    // آدرس دقیق درخواست به REST API گوگل
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/${selectedModel}:generateContent?key=${apiKey}`;
+    // تغییر آدرس به نسخه پایدار v1 (به جای v1beta)
+    const url = `https://generativelanguage.googleapis.com/v1/models/${selectedModel}:generateContent?key=${apiKey}`;
 
     try {
         const response = await fetch(url, {
