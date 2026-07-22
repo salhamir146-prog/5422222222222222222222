@@ -43,7 +43,7 @@
             font-size: 0.9rem;
             color: #94a3b8;
         }
-        input, textarea {
+        input, select, textarea {
             width: 100%;
             padding: 12px;
             border-radius: 8px;
@@ -53,7 +53,7 @@
             font-size: 0.95rem;
             transition: border-color 0.2s;
         }
-        input:focus, textarea:focus {
+        input:focus, select:focus, textarea:focus {
             outline: none;
             border-color: #38bdf8;
         }
@@ -115,6 +115,15 @@
     </div>
 
     <div class="form-group">
+        <label for="modelSelect">انتخاب مدل:</label>
+        <select id="modelSelect">
+            <option value="gemini-2.0-flash">Gemini 2.0 Flash (جدیدترین و عالی)</option>
+            <option value="gemini-1.5-flash">Gemini 1.5 Flash</option>
+            <option value="gemini-1.5-pro">Gemini 1.5 Pro</option>
+        </select>
+    </div>
+
+    <div class="form-group">
         <label for="message">متن پیام جهت ارسال:</label>
         <textarea id="message" rows="3">سلام! اگر سالمی یک جمله کوتاه بگو.</textarea>
     </div>
@@ -124,7 +133,7 @@
     <div id="resultBox" class="result">
         <strong id="statusTitle"></strong>
         <div id="responseContainer" style="display:none;">
-            <p style="margin-top:8px; font-size:0.85rem; color:#94a3b8;">پاسخ جمینای:</p>
+            <p style="margin-top:8px; font-size:0.85rem; color:#94a3b8;">پاسخ دریافتی:</p>
             <div id="replyText" class="response-box"></div>
         </div>
     </div>
@@ -133,6 +142,7 @@
 <script>
 async function checkGeminiKey() {
     const apiKey = document.getElementById('apiKey').value.trim();
+    const selectedModel = document.getElementById('modelSelect').value;
     const message = document.getElementById('message').value.trim();
     const sendBtn = document.getElementById('sendBtn');
     const resultBox = document.getElementById('resultBox');
@@ -145,12 +155,11 @@ async function checkGeminiKey() {
         return;
     }
 
-    // تغییر حالت دکمه به در حال بارگذاری
     sendBtn.disabled = true;
     sendBtn.innerText = 'در حال ارسال و بررسی... ⏳';
     resultBox.style.display = 'none';
 
-   const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${selectedModel}:generateContent?key=${apiKey}`;
 
     try {
         const response = await fetch(url, {
@@ -182,7 +191,7 @@ async function checkGeminiKey() {
         resultBox.style.display = 'block';
         resultBox.className = 'result error';
         statusTitle.innerText = '❌ خطای شبکه / عدم ارتباط';
-        replyText.innerText = 'امکان برقراری ارتباط با گوگل وجود ندارد. (از اتصال اینترنت یا تحریم‌شکن/فیلترشکن مطمئن شوید)';
+        replyText.innerText = 'امکان برقراری ارتباط با گوگل وجود ندارد. (از اتصال اینترنت یا ابزار تغییر IP مطمئن شوید)';
         responseContainer.style.display = 'block';
     } finally {
         sendBtn.disabled = false;
